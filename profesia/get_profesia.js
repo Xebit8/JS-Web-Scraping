@@ -50,6 +50,7 @@ async function scrapPage(base_url) {
         let hasMorePages = true;
         let profesiaData = [];
 
+        // Scraping data on each page
         while (hasMorePages) {
             console.log(counter);
             const response = await axios.get(`${base_url}?page_num=${counter}`, { headers });
@@ -61,6 +62,7 @@ async function scrapPage(base_url) {
             console.log($vacTitle.eq(-1).text());
             if (profesiaData.length > 0) console.log(profesiaData.at(-1)["title"])
 
+            // Check if there are vacancies to be scraped on page
             if ($vacTitle.length === 0) {
                 hasMorePages = false;
                 break;
@@ -70,6 +72,7 @@ async function scrapPage(base_url) {
             const $vacAddress = $(".job-location");
             const $vacSalary = $(".label");
 
+            // Bringing data to proper form and pushing it
             for (let i = 0; i < $vacTitle.length; i++) {
                 profesiaData.push({
                     title: $vacTitle.eq(i).text(),
@@ -90,6 +93,7 @@ function analyzeData(profesiaData) {
     const totalPrace = profesiaData.length;
     const attrNames = ["title", "employer", "address", "salary"];
 
+    // Building statistics for each column
     attrNames.forEach(attr => {
         let wordCounts = [];
         let uniqueWords = new Set();

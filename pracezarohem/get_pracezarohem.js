@@ -49,7 +49,9 @@ async function scrapPage(base_url) {
         let hasMorePages = true;
         let pracezarohemData = [];
 
+        // Scraping data on each page
         while (hasMorePages) {
+            // Try-Else to intercept error 500
             try {
                 console.log(counter);
                 const response = await axios.get(`${base_url}?page=${counter}`, { headers });
@@ -67,6 +69,7 @@ async function scrapPage(base_url) {
                 const $vacAddress = $(".advert-address");
                 const $vacSalary = $(".mb-2.d-flex");
 
+                // Bringing data to proper form and pushing it
                 for (let i = 0; i < $vacTitle.length; i++) {
                     pracezarohemData.push({
                         title: $vacTitle.eq(i).text(),
@@ -95,6 +98,7 @@ function analyzeData(pracezarohemData) {
     const totalJobs = pracezarohemData.length;
     const attrNames = ["title", "employer", "address", "salary"];
 
+    // Building statistics for each column
     attrNames.forEach(attr => {
         let wordCounts = [];
         let uniqueWords = new Set();

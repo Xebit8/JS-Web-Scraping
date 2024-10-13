@@ -49,7 +49,9 @@ async function scrapPage(base_url) {
         let hasMorePages = true;
         let praceData = [];
 
+        // Scraping data on each page
         while (hasMorePages) {
+            // Try-Else to intercept error 404
             try {
                 console.log(counter);
                 const response = await axios.get(`${base_url}?page=${counter}`, { headers });
@@ -67,11 +69,12 @@ async function scrapPage(base_url) {
                 const $vacSalary = $(".search-result__advert__box__item--salary");
                 const $vacEmploymentType = $(".search-result__advert__box__item--employment-type");
 
+                // Bringing data to proper form and pushing it
                 for (let i = 0; i < $vacTitle.length; i++) {
                     praceData.push({
                         title: $vacTitle.eq(i).text(),
                         employer: $vacEmployer.eq(i).text().replace('•', '').trim(),
-                        city: $vacCity.eq(i).text().replace("/\s+/g", '').trim(),
+                        city: $vacCity.eq(i).text().replace(/\s+/g, ' ').trim(),
                         salary: $vacSalary.eq(i).text().trim(),
                         employmentType: $vacEmploymentType.eq(i).text().replace('•', '').trim()
                     });
@@ -94,6 +97,7 @@ function analyzeData(praceData) {
     const totalPrace = praceData.length;
     const attrNames = ["title", "employer", "city", "salary", "employmentType"];
 
+    // Building statistics for each column
     attrNames.forEach(attr => {
         let wordCounts = [];
         let uniqueWords = new Set();

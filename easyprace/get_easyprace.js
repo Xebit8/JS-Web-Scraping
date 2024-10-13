@@ -49,6 +49,7 @@ async function scrapPage(base_url) {
         let hasMorePages = true;
         let easypraceData = [];
 
+        // Scraping data on each page
         while (counter < 1000) {
             console.log(counter);
             const response = await axios.get(`${base_url}/strana/${counter}`, { headers });
@@ -57,6 +58,7 @@ async function scrapPage(base_url) {
 
             const $vacTitle = $(".nabidkaItem-title");
 
+            // Checking if there are vacancies to be scraped on page
             if ($vacTitle.length === 0) {
                  hasMorePages = false;
                  break;
@@ -67,6 +69,7 @@ async function scrapPage(base_url) {
             const $vacSalary = $(".label-success");
             const $vacEmploymentType = $(".nabidkaItem-infoRow ~ div ~ div");
 
+            // Bringing data to proper form and pushing it
             for (let i = 0; i < $vacTitle.length; i++) {
                 easypraceData.push({
                     title: $vacTitle.eq(i).text().trim(),
@@ -90,6 +93,7 @@ function analyzeData(easypraceData) {
     const totalJobs = easypraceData.length;
     const attrNames = ["title", "employer", "address", "salary", "employmentType"];
 
+    // Building statistics for each column
     attrNames.forEach(attr => {
         let wordCounts = [];
         let uniqueWords = new Set();

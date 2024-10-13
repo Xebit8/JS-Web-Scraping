@@ -45,7 +45,8 @@ async function scrapPage(base_url) {
         let counter = 1;
         let hasMorePages = true;
         let jobsData = [];
-
+        
+        // Scraping data on each page
         while (hasMorePages) {
             console.log(counter);
             const response = await axios.get(`${base_url}?page=${counter}`, { headers });
@@ -54,6 +55,7 @@ async function scrapPage(base_url) {
 
             const $vacTitle = $(".SearchResultCard__titleLink");
 
+            // Checking if pages are duplicated
             if (jobsData.length > 0 && $vacTitle.eq(-1).text().trim() === jobsData.at(-1)["title"]) {
                 hasMorePages = false;
                 break;
@@ -63,6 +65,7 @@ async function scrapPage(base_url) {
             const $vacAddress = $("li[data-test=serp-locality]");
             const $vacFeatures = $(".SearchResultCard__body > .Tag");
 
+            // Bringing data to proper form and pushing it
             for (let i = 0; i < $vacTitle.length; i++) {
                 jobsData.push({
                     title: $vacTitle.eq(i).text().trim(),
@@ -85,6 +88,7 @@ function analyzeData(jobsData) {
     const totalJobs = jobsData.length;
     const attrNames = ["title", "employer", "address", "features"];
 
+    // Building statistics for each column
     attrNames.forEach(attr => {
         let wordCounts = [];
         let uniqueWords = new Set();
