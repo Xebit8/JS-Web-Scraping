@@ -2,7 +2,6 @@
 
 const axios = require('axios');
 const cheerio = require('cheerio');
-const { isUndefined } = require('util');
 const fs = require('fs').promises;
 
 const base_url = "https://www.jobs.cz/prace";
