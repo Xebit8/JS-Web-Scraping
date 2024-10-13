@@ -49,7 +49,7 @@ async function scrapPage(base_url) {
         let hasMorePages = true;
         let easypraceData = [];
 
-        while (hasMorePages) {
+        while (counter < 1000) {
             console.log(counter);
             const response = await axios.get(`${base_url}/strana/${counter}`, { headers });
 
