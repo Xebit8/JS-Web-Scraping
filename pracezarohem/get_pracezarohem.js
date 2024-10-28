@@ -28,21 +28,21 @@ const headers = {
     "User-agent": ua,
 };
 
-(async function getPracezarohemInfo()
+module.exports = async function getPracezarohemInfo()
 {
     try
     {
         const pracezarohemData = await scrapPage(base_url);
 
-        await fs.writeFile("pracezarohem/clean_response.json", JSON.stringify(pracezarohemData, null, 4));
+        await fs.writeFile("pracezarohem/analysis_result.json", analyzeData(pracezarohemData));
 
-        analyzeData(pracezarohemData);
+        return pracezarohemData;
 
     } catch(error)
     {
         console.error(error);
     }
-})();
+}
 async function scrapPage(base_url) {
     try {
         let counter = 1;
@@ -53,7 +53,7 @@ async function scrapPage(base_url) {
         const delay = ms => new Promise(resolve => setTimeout(resolve, ms * 1000));
 
         // Scraping data on each page
-        while (hasMorePages) {
+        while (counter < 3) {
             // Try-Else to intercept error 500
             try {
                 console.log(counter);
@@ -103,7 +103,8 @@ async function scrapPage(base_url) {
 }
 
 function analyzeData(pracezarohemData) {
-    const totalJobs = pracezarohemData.length;
+    let msg = "";
+    const totalPracezarohem = pracezarohemData.length;
     const attrNames = ["title", "employer", "address", "salary"]; // No need to analyze links column
 
     // Building statistics for each column
@@ -127,15 +128,16 @@ function analyzeData(pracezarohemData) {
         const maxWords = Math.max(...wordCounts);
         const avgWords = wordCounts.reduce((sum, count) => sum + count, 0) / wordCounts.length;
         const uniqueWordCount = uniqueWords.size;
-        const missingRatio = missingCount / totalJobs;
+        const missingRatio = missingCount / totalPracezarohem;
 
-        console.log(`Атрибут: ${attr}`);
-        console.log(`Общее количество: ${totalJobs}`);
-        console.log(`Минимум слов: ${minWords}`);
-        console.log(`Максимум слов: ${maxWords}`);
-        console.log(`Среднее количество слов: ${avgWords.toFixed(2)}`);
-        console.log(`Количество уникальных слов: ${uniqueWordCount}`);
-        console.log(`Доля пропусков: ${(missingRatio * 100).toFixed(2)}%`);
-        console.log('-----------------------------------');
+        msg +=  `Атрибут: ${attr}`+
+                `\nОбщее количество: ${totalPracezarohem}`+
+                `\nМинимум слов: ${minWords}`+
+                `\nМаксимум слов: ${maxWords}`+
+                `\nСреднее количество слов: ${avgWords.toFixed(2)}`+
+                `\nКоличество уникальных слов: ${uniqueWordCount}`+
+                `\nДоля пропусков: ${(missingRatio * 100).toFixed(2)}%`+
+                `\n-----------------------------------\n`;
     });
+    return msg;
 }
