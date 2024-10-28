@@ -4,3 +4,8 @@ node_modules
 spare code for scrapping via individual pages.js
 vacancies_createTables.sql
 vacancies_dropTables.sql
+jobs/analysis_result.txt
+easyprace/analysis_result.txt
+prace/analysis_result.txt
+pracezarohem/analysis_result.txt
+profesia/analysis_result.txt
