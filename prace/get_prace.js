@@ -28,21 +28,21 @@ const headers = {
     "User-agent": ua,
 };
 
-(async function getPraceInfo()
+module.exports = async function getPraceInfo()
 {
     try
     {
         const praceData = await scrapPage(base_url);
 
-        await fs.writeFile("prace/clean_response.json", JSON.stringify(praceData, null, 4));
+        await fs.writeFile("prace/analysis_result.txt", analyzeData(praceData));
 
-        analyzeData(praceData);
+        return praceData;
 
     } catch(error)
     {
         console.error(error);
     }
-})();
+}
 async function scrapPage(base_url) {
     try {
         let counter = 1;
@@ -53,7 +53,7 @@ async function scrapPage(base_url) {
         const delay = ms => new Promise(resolve => setTimeout(resolve, ms * 1000));
 
         // Scraping data on each page
-        while (hasMorePages) {
+        while (counter < 3) {
             // Try-Else to intercept error 404
             try {
                 console.log(counter);
@@ -83,7 +83,7 @@ async function scrapPage(base_url) {
                         employer: $vacEmployer.eq(i).text().replace('•', '').trim(),
                         city: $vacCity.eq(i).text().replace(/\s+/g, ' ').trim(),
                         salary: $vacSalary.eq(i).text().trim(),
-                        employmentType: $vacEmploymentType.eq(i).text().replace('•', '').trim(),
+                        employment_type: $vacEmploymentType.eq(i).text().replace('•', '').trim(),
                         link: $vacLink.eq(i).attr('href'),
                     });
                 }
@@ -102,8 +102,9 @@ async function scrapPage(base_url) {
 }
 
 function analyzeData(praceData) {
+    let msg = "";
     const totalPrace = praceData.length;
-    const attrNames = ["title", "employer", "city", "salary", "employmentType"]; // No need to analyze links column
+    const attrNames = ["title", "employer", "city", "salary", "employment_type"]; // No need to analyze links column
 
     // Building statistics for each column
     attrNames.forEach(attr => {
@@ -128,13 +129,14 @@ function analyzeData(praceData) {
         const uniqueWordCount = uniqueWords.size;
         const missingRatio = missingCount / totalPrace;
 
-        console.log(`Атрибут: ${attr}`);
-        console.log(`Общее количество: ${totalPrace}`);
-        console.log(`Минимум слов: ${minWords}`);
-        console.log(`Максимум слов: ${maxWords}`);
-        console.log(`Среднее количество слов: ${avgWords.toFixed(2)}`);
-        console.log(`Количество уникальных слов: ${uniqueWordCount}`);
-        console.log(`Доля пропусков: ${(missingRatio * 100).toFixed(2)}%`);
-        console.log('-----------------------------------');
+        msg +=  `Атрибут: ${attr}`+
+                `\nОбщее количество: ${totalPrace}`+
+                `\nМинимум слов: ${minWords}`+
+                `\nМаксимум слов: ${maxWords}`+
+                `\nСреднее количество слов: ${avgWords.toFixed(2)}`+
+                `\nКоличество уникальных слов: ${uniqueWordCount}`+
+                `\nДоля пропусков: ${(missingRatio * 100).toFixed(2)}%`+
+                `\n-----------------------------------\n`;
     });
+    return msg;
 }
