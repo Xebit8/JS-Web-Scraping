@@ -48,12 +48,18 @@ async function scrapPage(base_url) {
         let counter = 1;
         let hasMorePages = true;
         let praceData = [];
+                
+        // Delay time function
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms * 1000));
 
         // Scraping data on each page
         while (hasMorePages) {
             // Try-Else to intercept error 404
             try {
                 console.log(counter);
+                
+                await delay(2); // Wait before request to lessen suspicion
+
                 const response = await axios.get(`${base_url}?page=${counter}`, { headers });
 
                 const $ = cheerio.load(response.data);
@@ -63,11 +69,12 @@ async function scrapPage(base_url) {
                     break;
                 }
 
-                const $vacTitle = $(".half-standalone .link strong");
+                const $vacTitle = $(".search-result__advert .half-standalone > .link > strong");
                 const $vacEmployer = $(".search-result__advert__box__item--company");
                 const $vacCity = $(".search-result__advert__box__item--location");
                 const $vacSalary = $(".search-result__advert__box__item--salary");
                 const $vacEmploymentType = $(".search-result__advert__box__item--employment-type");
+                const $vacLink = $(".search-result__advert .link");
 
                 // Bringing data to proper form and pushing it
                 for (let i = 0; i < $vacTitle.length; i++) {
@@ -76,7 +83,8 @@ async function scrapPage(base_url) {
                         employer: $vacEmployer.eq(i).text().replace('•', '').trim(),
                         city: $vacCity.eq(i).text().replace(/\s+/g, ' ').trim(),
                         salary: $vacSalary.eq(i).text().trim(),
-                        employmentType: $vacEmploymentType.eq(i).text().replace('•', '').trim()
+                        employmentType: $vacEmploymentType.eq(i).text().replace('•', '').trim(),
+                        link: $vacLink.eq(i).attr('href'),
                     });
                 }
                 counter++;
@@ -95,7 +103,7 @@ async function scrapPage(base_url) {
 
 function analyzeData(praceData) {
     const totalPrace = praceData.length;
-    const attrNames = ["title", "employer", "city", "salary", "employmentType"];
+    const attrNames = ["title", "employer", "city", "salary", "employmentType"]; // No need to analyze links column
 
     // Building statistics for each column
     attrNames.forEach(attr => {

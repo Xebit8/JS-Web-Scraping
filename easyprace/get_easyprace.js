@@ -5,7 +5,7 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 const fs = require('fs').promises;
 
-const base_url = "https://www.easy-prace.cz/nabidka-zamestnani";
+const base_url = "https://www.easy-prace.cz";
 
 const userAgents = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/109.0.0.0 Safari/537.36",
@@ -48,11 +48,17 @@ async function scrapPage(base_url) {
         let counter = 1;
         let hasMorePages = true;
         let easypraceData = [];
+                
+        // Delay time function
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms * 1000));
 
         // Scraping data on each page
         while (counter < 1000) {
             console.log(counter);
-            const response = await axios.get(`${base_url}/strana/${counter}`, { headers });
+            
+            await delay(2); // Wait before request to lessen suspicion
+
+            const response = await axios.get(`${base_url}/nabidka-zamestnani/${counter}`, { headers });
 
             const $ = cheerio.load(response.data);
 
@@ -68,6 +74,7 @@ async function scrapPage(base_url) {
             const $vacAddress = $(".nabidkaItem-infoRow");
             const $vacSalary = $(".label-success");
             const $vacEmploymentType = $(".nabidkaItem-infoRow ~ div ~ div");
+            const $vacLink = $(".nabidkaItem-title > a");
 
             // Bringing data to proper form and pushing it
             for (let i = 0; i < $vacTitle.length; i++) {
@@ -76,7 +83,8 @@ async function scrapPage(base_url) {
                     employer: $vacEmployer.eq(i).text().trim(),
                     address: $vacAddress.eq(i).text().trim(),
                     salary: $vacSalary.eq(i).text(),
-                    employmentType: $vacEmploymentType.eq(i).text().trim()
+                    employmentType: $vacEmploymentType.eq(i).text().trim(),
+                    link: base_url + $vacLink.eq(i).attr('href'),
                 });
             }
 
@@ -91,7 +99,7 @@ async function scrapPage(base_url) {
 
 function analyzeData(easypraceData) {
     const totalJobs = easypraceData.length;
-    const attrNames = ["title", "employer", "address", "salary", "employmentType"];
+    const attrNames = ["title", "employer", "address", "salary", "employmentType"]; // No need to analyze links column
 
     // Building statistics for each column
     attrNames.forEach(attr => {

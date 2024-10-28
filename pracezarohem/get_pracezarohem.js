@@ -48,26 +48,33 @@ async function scrapPage(base_url) {
         let counter = 1;
         let hasMorePages = true;
         let pracezarohemData = [];
+                
+        // Delay time function
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms * 1000));
 
         // Scraping data on each page
         while (hasMorePages) {
             // Try-Else to intercept error 500
             try {
                 console.log(counter);
+                
+                await delay(2); // Wait before request to lessen suspicion
+
                 const response = await axios.get(`${base_url}?page=${counter}`, { headers });
 
                 const $ = cheerio.load(response.data);
 
-                const $vacTitle = $(".typography-heading-small-text");
+                const $vacTitle = $(".pl-md-0.pr-md-0 > a > .typography-heading-small-text");
 
                 if (response.status === 500) {
-                    hasMorePages = false; 
+                    hasMorePages = false;
                     break;
                 }
                 
                 const $vacEmployer = $(".company-name");
                 const $vacAddress = $(".advert-address");
                 const $vacSalary = $(".mb-2.d-flex");
+                const $vacLink = $(".pl-md-0.pr-md-0 > a");
 
                 // Bringing data to proper form and pushing it
                 for (let i = 0; i < $vacTitle.length; i++) {
@@ -75,7 +82,8 @@ async function scrapPage(base_url) {
                         title: $vacTitle.eq(i).text(),
                         employer: $vacEmployer.eq(i).text(),
                         address: $vacAddress.eq(i).text(),
-                        salary: $vacSalary.eq(i).text()
+                        salary: $vacSalary.eq(i).text(),
+                        link: $vacLink.eq(i).attr('href'),
                     });
                 }
 
@@ -96,7 +104,7 @@ async function scrapPage(base_url) {
 
 function analyzeData(pracezarohemData) {
     const totalJobs = pracezarohemData.length;
-    const attrNames = ["title", "employer", "address", "salary"];
+    const attrNames = ["title", "employer", "address", "salary"]; // No need to analyze links column
 
     // Building statistics for each column
     attrNames.forEach(attr => {

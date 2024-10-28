@@ -46,9 +46,15 @@ async function scrapPage(base_url) {
         let hasMorePages = true;
         let jobsData = [];
         
+        // Delay time function
+        const delay = ms => new Promise(resolve => setTimeout(resolve, ms * 1000));
+        
         // Scraping data on each page
         while (hasMorePages) {
             console.log(counter);
+
+            await delay(2); // Wait before request to lessen suspicion
+
             const response = await axios.get(`${base_url}?page=${counter}`, { headers });
 
             const $ = cheerio.load(response.data);
@@ -64,6 +70,7 @@ async function scrapPage(base_url) {
             const $vacEmployer = $(".SearchResultCard__footerItem");
             const $vacAddress = $("li[data-test=serp-locality]");
             const $vacFeatures = $(".SearchResultCard__body > .Tag");
+            const $vacLink = $(".SearchResultCard__titleLink");
 
             // Bringing data to proper form and pushing it
             for (let i = 0; i < $vacTitle.length; i++) {
@@ -71,7 +78,8 @@ async function scrapPage(base_url) {
                     title: $vacTitle.eq(i).text().trim(),
                     employer: $vacEmployer.eq(i).text().trim(),
                     address: $vacAddress.eq(i).text().trim(),
-                    features: $vacFeatures.eq(i).text().trim()
+                    features: $vacFeatures.eq(i).text().trim(),
+                    link: $vacLink.eq(i).attr('href'),
                 });
             }
 
@@ -86,7 +94,7 @@ async function scrapPage(base_url) {
 
 function analyzeData(jobsData) {
     const totalJobs = jobsData.length;
-    const attrNames = ["title", "employer", "address", "features"];
+    const attrNames = ["title", "employer", "address", "features"]; // No need to analyze links column
 
     // Building statistics for each column
     attrNames.forEach(attr => {
