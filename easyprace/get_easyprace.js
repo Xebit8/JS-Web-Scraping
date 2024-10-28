@@ -28,21 +28,21 @@ const headers = {
     "User-agent": ua,
 };
 
-(async function getEasyPraceInfo()
+module.exports = async function getEasyPraceInfo()
 {
     try
     {
         const easypraceData = await scrapPage(base_url);
 
-        await fs.writeFile("easyprace/clean_response.json", JSON.stringify(easypraceData, null, 4));
+        await fs.writeFile("easyprace/analysis_result.txt", analyzeData(easypraceData));
 
-        analyzeData(easypraceData);
+        return easypraceData;
 
     } catch(error)
     {
         console.error(error);
     }
-})();
+}
 async function scrapPage(base_url) {
     try {
         let counter = 1;
@@ -53,7 +53,7 @@ async function scrapPage(base_url) {
         const delay = ms => new Promise(resolve => setTimeout(resolve, ms * 1000));
 
         // Scraping data on each page
-        while (counter < 500) {
+        while (counter < 3) {
             console.log(counter);
             
             await delay(2); // Wait before request to lessen suspicion
@@ -83,7 +83,7 @@ async function scrapPage(base_url) {
                     employer: $vacEmployer.eq(i).text().trim(),
                     address: $vacAddress.eq(i).text().trim(),
                     salary: $vacSalary.eq(i).text(),
-                    employmentType: $vacEmploymentType.eq(i).text().trim(),
+                    employment_type: $vacEmploymentType.eq(i).text().trim(),
                     link: base_url + $vacLink.eq(i).attr('href'),
                 });
             }
@@ -98,8 +98,9 @@ async function scrapPage(base_url) {
 }
 
 function analyzeData(easypraceData) {
-    const totalJobs = easypraceData.length;
-    const attrNames = ["title", "employer", "address", "salary", "employmentType"]; // No need to analyze links column
+    let msg = "";
+    const totalEasyprace = easypraceData.length;
+    const attrNames = ["title", "employer", "address", "salary", "employment_type"]; // No need to analyze links column
 
     // Building statistics for each column
     attrNames.forEach(attr => {
@@ -122,15 +123,16 @@ function analyzeData(easypraceData) {
         const maxWords = Math.max(...wordCounts);
         const avgWords = wordCounts.reduce((sum, count) => sum + count, 0) / wordCounts.length;
         const uniqueWordCount = uniqueWords.size;
-        const missingRatio = missingCount / totalJobs;
+        const missingRatio = missingCount / totalEasyprace;
 
-        console.log(`Атрибут: ${attr}`);
-        console.log(`Общее количество: ${totalJobs}`);
-        console.log(`Минимум слов: ${minWords}`);
-        console.log(`Максимум слов: ${maxWords}`);
-        console.log(`Среднее количество слов: ${avgWords.toFixed(2)}`);
-        console.log(`Количество уникальных слов: ${uniqueWordCount}`);
-        console.log(`Доля пропусков: ${(missingRatio * 100).toFixed(2)}%`);
-        console.log('-----------------------------------');
+        msg +=  `Атрибут: ${attr}`+
+        `\nОбщее количество: ${totalEasyprace}`+
+        `\nМинимум слов: ${minWords}`+
+        `\nМаксимум слов: ${maxWords}`+
+        `\nСреднее количество слов: ${avgWords.toFixed(2)}`+
+        `\nКоличество уникальных слов: ${uniqueWordCount}`+
+        `\nДоля пропусков: ${(missingRatio * 100).toFixed(2)}%`+
+        `\n-----------------------------------\n`;
     });
+    return msg;
 }
