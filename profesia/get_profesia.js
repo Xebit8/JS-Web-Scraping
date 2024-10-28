@@ -28,22 +28,22 @@ const headers = {
     "User-agent": ua,
 };
 
-(async function getProfesiaInfo()
+module.exports = async function getProfesiaInfo()
 {
     try
     {
         const profesiaData = await scrapPage(base_url);
 
-        await fs.writeFile("profesia/clean_response.json", JSON.stringify(profesiaData, null, 4));
+        await fs.writeFile("profesia/analysis_result.txt", analyzeData(profesiaData));
 
-        analyzeData(profesiaData);
+        return profesiaData;
 
 
     } catch(error)
     {
         console.error(error);
     }
-})();
+}
 async function scrapPage(base_url) {
     try {
         let counter = 1;
@@ -54,7 +54,7 @@ async function scrapPage(base_url) {
         const delay = ms => new Promise(resolve => setTimeout(resolve, ms * 1000));
 
         // Scraping data on each page
-        while (hasMorePages) {
+        while (counter < 3) {
             console.log(counter);
             
             await delay(2); // Wait before request to lessen suspicion
@@ -95,7 +95,8 @@ async function scrapPage(base_url) {
     }
 }
 function analyzeData(profesiaData) {
-    const totalPrace = profesiaData.length;
+    let msg = "";
+    const totalProfesia = profesiaData.length;
     const attrNames = ["title", "employer", "address", "salary"]; // No need to analyze links column
 
     // Building statistics for each column
@@ -119,15 +120,16 @@ function analyzeData(profesiaData) {
         const maxWords = Math.max(...wordCounts);
         const avgWords = wordCounts.reduce((sum, count) => sum + count, 0) / wordCounts.length;
         const uniqueWordCount = uniqueWords.size;
-        const missingRatio = missingCount / totalPrace;
+        const missingRatio = missingCount / totalProfesia;
 
-        console.log(`Атрибут: ${attr}`);
-        console.log(`Общее количество: ${totalPrace}`);
-        console.log(`Минимум слов: ${minWords}`);
-        console.log(`Максимум слов: ${maxWords}`);
-        console.log(`Среднее количество слов: ${avgWords.toFixed(2)}`);
-        console.log(`Количество уникальных слов: ${uniqueWordCount}`);
-        console.log(`Доля пропусков: ${(missingRatio * 100).toFixed(2)}%`);
-        console.log('-----------------------------------');
+        msg +=  `Атрибут: ${attr}`+
+        `\nОбщее количество: ${totalProfesia}`+
+        `\nМинимум слов: ${minWords}`+
+        `\nМаксимум слов: ${maxWords}`+
+        `\nСреднее количество слов: ${avgWords.toFixed(2)}`+
+        `\nКоличество уникальных слов: ${uniqueWordCount}`+
+        `\nДоля пропусков: ${(missingRatio * 100).toFixed(2)}%`+
+        `\n-----------------------------------\n`;
     });
+    return msg;
 }
