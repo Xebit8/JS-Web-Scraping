@@ -53,7 +53,7 @@ async function scrapPage(base_url) {
         const delay = ms => new Promise(resolve => setTimeout(resolve, ms * 1000));
 
         // Scraping data on each page
-        while (counter < 1000) {
+        while (counter < 500) {
             console.log(counter);
             
             await delay(2); // Wait before request to lessen suspicion
