@@ -45,7 +45,6 @@ const sequelize = new Sequelize(database, username, password, {
             },
             {
                 tableName: 'easypracecz',
-                timestamps: false,
             }
         );
 
