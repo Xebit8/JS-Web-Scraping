@@ -27,18 +27,17 @@ const headers = {
     "X-Requested-With": "XMLHttpRequest",
 };
 
-(async function getJobsInfo() {
+module.exports = async function getJobsInfo() {
     try {
         const jobsData = await scrapPage(base_url);
+        await fs.writeFile("jobs/analysis_result.txt", analyzeData(jobsData));
 
-        await fs.writeFile("jobs/clean_response.json", JSON.stringify(jobsData, null, 4));
-
-        analyzeData(jobsData);
+        return jobsData;
 
     } catch (error) {
         console.error(error);
     }
-})();
+}
 
 async function scrapPage(base_url) {
     try {
@@ -50,7 +49,7 @@ async function scrapPage(base_url) {
         const delay = ms => new Promise(resolve => setTimeout(resolve, ms * 1000));
         
         // Scraping data on each page
-        while (hasMorePages) {
+        while (counter < 3) {
             console.log(counter);
 
             await delay(2); // Wait before request to lessen suspicion
@@ -93,6 +92,7 @@ async function scrapPage(base_url) {
 }
 
 function analyzeData(jobsData) {
+    let msg = "";
     const totalJobs = jobsData.length;
     const attrNames = ["title", "employer", "address", "features"]; // No need to analyze links column
 
@@ -119,13 +119,16 @@ function analyzeData(jobsData) {
         const uniqueWordCount = uniqueWords.size;
         const missingRatio = missingCount / totalJobs;
 
-        console.log(`Атрибут: ${attr}`);
-        console.log(`Общее количество: ${totalJobs}`);
-        console.log(`Минимум слов: ${minWords}`);
-        console.log(`Максимум слов: ${maxWords}`);
-        console.log(`Среднее количество слов: ${avgWords.toFixed(2)}`);
-        console.log(`Количество уникальных слов: ${uniqueWordCount}`);
-        console.log(`Доля пропусков: ${(missingRatio * 100).toFixed(2)}%`);
-        console.log('-----------------------------------');
+        msg +=  `Атрибут: ${attr}`+
+                `\nОбщее количество: ${totalJobs}`+
+                `\nМинимум слов: ${minWords}`+
+                `\nМаксимум слов: ${maxWords}`+
+                `\nСреднее количество слов: ${avgWords.toFixed(2)}`+
+                `\nКоличество уникальных слов: ${uniqueWordCount}`+
+                `\nДоля пропусков: ${(missingRatio * 100).toFixed(2)}%`+
+                `\n-----------------------------------\n`;
     });
+    return msg;
 }
+
+
