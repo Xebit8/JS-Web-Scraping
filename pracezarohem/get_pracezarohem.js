@@ -34,7 +34,7 @@ module.exports = async function getPracezarohemInfo()
     {
         const pracezarohemData = await scrapPage(base_url);
 
-        await fs.writeFile("pracezarohem/analysis_result.json", analyzeData(pracezarohemData));
+        await fs.writeFile("pracezarohem/analysis_result.txt", analyzeData(pracezarohemData));
 
         return pracezarohemData;
 
