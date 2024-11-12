@@ -38,16 +38,46 @@ const sequelize = new Sequelize(database, username, password, {
                 tableName: 'jobscz',
             }
         );
+        Vacancy.sync({alter: true});
 
-        const jobs = await getJobsInfo();
-        console.log("[jobs.cz] Data was successfully scraped!")
+        let task_status = "Success";
+        try {
+            const jobs = await getJobsInfo();
+            console.log("[jobs.cz] Data was successfully scraped!");
 
-        for (let job of jobs) {
-            await Vacancy.create(job);
+            for (let job of jobs) {
+                await Vacancy.create(job);
+            }
+            console.log("[jobs.cz] Data was successfully saved!");
+        } catch (error) {
+            console.error("[jobs.cz] Failed to save data.", error);
+            task_status = "Failure";
         }
-        console.log("[jobs.cz] Data was successfully saved!")
+        create_task(task_status);
 
     } catch (error) {
-        console.error("[jobs.cz] Failed to connect to database", error);
+        console.error("[jobs.cz] Failed to connect to database.", error);
     }
 })();
+
+async function create_task(task_status) {
+    const Task = sequelize.define(
+        "task",
+        {
+            website: {
+                type: DataTypes.TEXT,
+                allowNull: false,
+            },
+            status: {
+                type: DataTypes.TEXT,
+                allowNull: false,
+                validate: {
+                    isIn: [["Success", "Failure"]],
+                },
+            },
+        }
+    )
+    Task.sync({alter: true});
+
+    await Task.create({website: "jobs.cz", status: task_status});
+}
