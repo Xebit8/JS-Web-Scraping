@@ -19,11 +19,6 @@ const sequelize = new Sequelize(database, username, password, {
         const Vacancy = sequelize.define(
             'profesiacz',
             {
-                id: {
-                    type: DataTypes.INTEGER,
-                    autoIncrementIdentity: true,
-                    primaryKey: true,
-                },
                 title: {
                     type: DataTypes.TEXT,
                     allowNull: false
