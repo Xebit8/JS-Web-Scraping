@@ -3,6 +3,7 @@
 
 const { Sequelize, Model, DataTypes} = require("sequelize");
 const { database, username, password } = require("../2auth.js");
+const { CronJob, CronTime } = require("cron");
 const getProfesiaInfo = require("./get_profesia.js");
 
 const sequelize = new Sequelize(database, username, password, {
@@ -11,7 +12,7 @@ const sequelize = new Sequelize(database, username, password, {
     omitNull: true,
 });
 
-(async function saveToDatabase() {
+async function saveToDatabase() {
     try {
         await sequelize.authenticate();
         console.log("[profesia.cz] Successfully connected to database!");
@@ -58,7 +59,7 @@ const sequelize = new Sequelize(database, username, password, {
     } catch (error) {
         console.error("[profesia.cz] Failed to connect to database", error);
     }
-})();
+}
 
 async function create_task(task_status) {
     const Task = sequelize.define(
@@ -81,3 +82,10 @@ async function create_task(task_status) {
 
     await Task.create({website: "profesia.cz", status: task_status});
 }
+
+const job = CronJob.from({
+    cronTime: '0 */5 * * * *',
+    onTick: () => saveToDatabase(),
+    start: true,
+    timeZone: 'Europe/Moscow'
+});
