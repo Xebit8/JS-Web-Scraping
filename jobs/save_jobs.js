@@ -85,7 +85,7 @@ async function create_task(task_status) {
 }
 
 const job = CronJob.from({
-    cronTime: '0 */5 * * * *',
+    cronTime: '0 0/5 * * * *',
     onTick: () => saveToDatabase(),
     start: true,
     timeZone: 'Europe/Moscow'
