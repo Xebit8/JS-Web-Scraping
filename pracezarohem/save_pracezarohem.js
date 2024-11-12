@@ -38,7 +38,7 @@ const sequelize = new Sequelize(database, username, password, {
                 tableName: 'pracezarohemcz',
             }
         );
-        Vacancy.sync({alter: true});
+        await Vacancy.sync({alter: true});
 
         let task_status = "Success";
         try {
@@ -77,7 +77,7 @@ async function create_task(task_status) {
             },
         }
     )
-    Task.sync({alter: true});
+    await Task.sync({alter: true});
 
     await Task.create({website: "pracezarohem.cz", status: task_status});
 }
