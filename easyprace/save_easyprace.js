@@ -1,49 +1,15 @@
 "use strict";
 
 
-const { Sequelize, Model, DataTypes} = require("sequelize");
-const { database, username, password } = require("../2auth.js");
-const { CronJob, CronTime } = require("cron");
+const { CronJob } = require("cron");
+const sequelize = require("../general/connect.js");
+const { Vacancy_EasyPrace, Task } = require("../general/models.js");
 const getEasypraceInfo = require("./get_easyprace.js");
-
-const sequelize = new Sequelize(database, username, password, {
-    host: 'localhost',
-    dialect: 'postgres',
-    omitNull: true,
-});
 
 async function saveToDatabase() {
     try {
         await sequelize.authenticate();
         console.log("[easy-prace.cz] Successfully connected to database!");
-        
-        const Vacancy = sequelize.define(
-            'easypracecz',
-            {
-                title: {
-                    type: DataTypes.TEXT,
-                    allowNull: false
-                },
-                employer: {
-                    type: DataTypes.TEXT,
-                    allowNull: false
-                },
-                address: DataTypes.TEXT,
-                salary: DataTypes.TEXT,
-                employment_type: {
-                    type: DataTypes.TEXT,
-                    allowNull: false
-                },
-                link: {
-                    type: DataTypes.TEXT,
-                    allowNull: false
-                },
-            },
-            {
-                tableName: 'easypracecz',
-            }
-        );
-        await Vacancy.sync({alter: true});
 
         let task_status = "Success";
         try {
@@ -51,7 +17,7 @@ async function saveToDatabase() {
             console.log("[easy-prace.cz] Data was successfully scraped!")
 
             for (let job of jobs) {
-                await Vacancy.create(job);
+                await Vacancy_EasyPrace.create(job);
             }
             console.log("[easy-prace.cz] Data was successfully saved!");
         } catch (error) {
@@ -66,25 +32,8 @@ async function saveToDatabase() {
 }
 
 async function create_task(task_status) {
-    const Task = sequelize.define(
-        "task",
-        {
-            website: {
-                type: DataTypes.TEXT,
-                allowNull: false,
-            },
-            status: {
-                type: DataTypes.TEXT,
-                allowNull: false,
-                validate: {
-                    isIn: [["Success", "Failure"]],
-                },
-            },
-        }
-    )
-    await Task.sync({alter: true});
-
     await Task.create({website: "easy-prace.cz", status: task_status});
+    console.log("[easy-prace.cz] The task is done!");
 }
 
 const job = CronJob.from({

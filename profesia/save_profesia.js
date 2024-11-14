@@ -1,45 +1,15 @@
 "use strict";
 
 
-const { Sequelize, Model, DataTypes} = require("sequelize");
-const { database, username, password } = require("../2auth.js");
-const { CronJob, CronTime } = require("cron");
+const { CronJob } = require("cron");
+const sequelize = require("../general/connect.js");
+const { Vacancy_Profesia, Task } = require("../general/models.js");
 const getProfesiaInfo = require("./get_profesia.js");
-
-const sequelize = new Sequelize(database, username, password, {
-    host: 'localhost',
-    dialect: 'postgres',
-    omitNull: true,
-});
 
 async function saveToDatabase() {
     try {
         await sequelize.authenticate();
         console.log("[profesia.cz] Successfully connected to database!");
-        
-        const Vacancy = sequelize.define(
-            'profesiacz',
-            {
-                title: {
-                    type: DataTypes.TEXT,
-                    allowNull: false
-                },
-                employer: {
-                    type: DataTypes.TEXT,
-                    allowNull: false
-                },
-                address: DataTypes.TEXT,
-                salary: DataTypes.TEXT,
-                link: {
-                    type: DataTypes.TEXT,
-                    allowNull: false
-                },
-            },
-            {
-                tableName: 'profesiacz',
-            }
-        );
-        await Vacancy.sync({alter: true});
 
         let task_status = "Success";
         try {
@@ -47,7 +17,7 @@ async function saveToDatabase() {
             console.log("[profesia.cz] Data was successfully scraped!")
 
             for (let job of jobs) {
-                await Vacancy.create(job);
+                await Vacancy_Profesia.create(job);
             }
             console.log("[profesia.cz] Data was successfully saved!");
         } catch (error) {
@@ -62,25 +32,8 @@ async function saveToDatabase() {
 }
 
 async function create_task(task_status) {
-    const Task = sequelize.define(
-        "task",
-        {
-            website: {
-                type: DataTypes.TEXT,
-                allowNull: false,
-            },
-            status: {
-                type: DataTypes.TEXT,
-                allowNull: false,
-                validate: {
-                    isIn: [["Success", "Failure"]],
-                },
-            },
-        }
-    )
-    await Task.sync({alter: true});
-
     await Task.create({website: "profesia.cz", status: task_status});
+    console.log("[profesia.cz] The task is done!");
 }
 
 const job = CronJob.from({
