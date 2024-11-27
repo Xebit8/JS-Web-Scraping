@@ -60,7 +60,6 @@ app.get('/profesia', async (req, res) => {
 
 sequelize.sync().then(() => {
   app.listen(port, () => {
-    console.log("\nheyyy\n")
     console.log(`Server running at http://localhost:${port}`);
   });
 });
