@@ -13,13 +13,14 @@ async function saveToDatabase() {
 
         let task_status = "Success";
         try {
-            const jobs = await getProfesiaInfo();
-            console.log("[profesia.cz] Data was successfully scraped!")
+            await Vacancy_Profesia.truncate({restartIdentity: true});
+            console.log("[profesia.cz] All old data was successfully deleted!");
 
-            for (let job of jobs) {
-                await Vacancy_Profesia.create(job);
-            }
-            console.log("[profesia.cz] Data was successfully saved!");
+            const jobs = await getProfesiaInfo();
+            console.log("[profesia.cz] Data was successfully scraped!");
+
+            await Vacancy_Profesia.bulkCreate(jobs);
+            console.log("[profesia.cz] New data was successfully saved!");
         } catch (error) {
             console.error("[profesia.cz] Failed to connect to database.", error);
             task_status = "Failure";
