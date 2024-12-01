@@ -1,0 +1,18 @@
+body {
+    padding: 20px;
+}
+
+.ui.segment {
+    height: 100%;
+    width: 100%;
+}
+.ui.header {
+    text-align: center;
+}
+.ui.buttons {
+    padding: 10px;
+    display: flex;
+}
+.ui.button.backbutton {
+    text-decoration: underline;
+}

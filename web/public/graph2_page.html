@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Graph 2</title>
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/semantic-ui/2.4.1/semantic.min.css"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="ui container">
+    <h1 class="ui header">Display addresses per employer</h1>
+    <div class="ui buttons">
+      <a href="index.html" class="ui button backbutton">Go back</a>
+      <button class="ui button" data-endpoint="/easyprace/graph2" data-graph-type="network2">EasyPrace</button>
+      <button class="ui button" data-endpoint="/jobs/graph2" data-graph-type="network2">Jobs</button>
+      <button class="ui button" data-endpoint="/prace/graph2" data-graph-type="network2">Prace</button>
+      <button class="ui button" data-endpoint="/pracezarohem/graph2" data-graph-type="network2">Pracezarohem</button>
+      <button class="ui button" data-endpoint="/profesia/graph2" data-graph-type="network2">Profesia</button>
+    </div>
+    <div id="chart" class="ui segment"></div>
+  </div>
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/networkgraph.js"></script>
+  <script src="diagrams.js"></script>
+</body>
+</html>
