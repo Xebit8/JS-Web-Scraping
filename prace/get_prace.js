@@ -43,7 +43,7 @@ async function scrapPage(base_url) {
         const delay = ms => new Promise(resolve => setTimeout(resolve, ms * 1000));
 
         // Scraping data on each page
-        while (counter < 3) {
+        while (hasMorePages) {
             // Try-Else to intercept error 404
             try {
                 console.log(counter);
