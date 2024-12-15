@@ -1,7 +1,6 @@
 "use strict";
 
 
-const { CronJob } = require("cron");
 const sequelize = require("../general/connect.js");
 const { Vacancy_Prace, Task } = require("../general/models.js");
 const getPraceInfo = require("./get_prace.js");
@@ -36,10 +35,3 @@ async function create_task(task_status) {
     await Task.create({website: "prace.cz", status: task_status});
     console.log("[prace.cz] The task is done!");
 }
-
-const job = CronJob.from({
-    cronTime: '0 3/5 * * * *',
-    onTick: () => saveToDatabase(),
-    start: true,
-    timeZone: 'Europe/Moscow'
-});
